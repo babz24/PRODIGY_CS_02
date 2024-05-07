@@ -1,0 +1,81 @@
+from PIL import Image
+import numpy as np
+import os
+
+def encrypt_image(image_path, key):
+    # Open the image
+    try:
+        img = Image.open(image_path)
+    except FileNotFoundError:
+        print("Error: Image file not found.")
+        return
+    
+    # Convert the image to a NumPy array
+    img_array = np.array(img)
+
+    # Ensure key has the same shape as img_array
+    key = np.resize(key, img_array.shape)
+
+    # Encrypt each pixel using XOR with the key
+    encrypted_array = np.bitwise_xor(img_array, key)
+    
+    # Convert the encrypted array back to an image
+    encrypted_img = Image.fromarray(encrypted_array)
+    
+    # Save the encrypted image
+    encrypted_img_path = os.path.splitext(image_path)[0] + "_encrypted.png"
+    encrypted_img.save(encrypted_img_path)
+    print("Image encrypted successfully. Encrypted image saved as:", encrypted_img_path)
+
+
+def decrypt_image(encrypted_image_path, key):
+    # Open the encrypted image
+    try:
+        encrypted_img = Image.open(encrypted_image_path)
+    except FileNotFoundError:
+        print("Error: Encrypted image file not found.")
+        return
+    
+    # Convert the encrypted image to a NumPy array
+    encrypted_array = np.array(encrypted_img)
+
+    # Ensure key has the same shape as encrypted_array
+    key = np.resize(key, encrypted_array.shape)
+
+    # Decrypt each pixel using XOR with the key
+    decrypted_array = np.bitwise_xor(encrypted_array, key)
+    
+    # Convert the decrypted array back to an image
+    decrypted_img = Image.fromarray(decrypted_array)
+    
+    # Save the decrypted image
+    decrypted_img_path = os.path.splitext(encrypted_image_path)[0] + "_decrypted.png"
+    decrypted_img.save(decrypted_img_path)
+    print("Image decrypted successfully. Decrypted image saved as:", decrypted_img_path)
+
+
+def main():
+    print("Image Encryption and Decryption using Pixel Manipulation")
+
+    # Input image path
+    image_path = input("Enter the path to the image file: ")
+    
+    # Validate input image path
+    if not os.path.exists(image_path):
+        print("Error: Image file does not exist.")
+        return
+
+    # Generate random key for encryption
+    encryption_key = np.random.randint(0, 256, size=(3,), dtype=np.uint8)
+    
+    # Generate random key for decryption
+    decryption_key = np.random.randint(0, 256, size=(3,), dtype=np.uint8)
+    
+    # Encrypt the image
+    encrypt_image(image_path, encryption_key)
+    
+    # Decrypt the image
+    decrypt_image(os.path.splitext(image_path)[0] + "_encrypted.png", decryption_key)
+
+if __name__ == "__main__":
+    main()
